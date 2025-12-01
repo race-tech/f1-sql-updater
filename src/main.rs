@@ -21,8 +21,20 @@ fn main() -> anyhow::Result<()> {
     let is_sprint = env::args().nth(2).unwrap().parse::<bool>()?;
     let year = chrono::Utc::now().year();
 
-    let url = "mysql://user:password@localhost:13306/f1db";
-    let mut conn = mysql::Conn::new(url)?;
+    let user = env::var("MYSQL_USER").unwrap_or("user".into());
+    let password = env::var("MYSQL_PWD").unwrap_or("password".into());
+    let port = env::var("MYSQL_TCP_PORT")
+        .map(|port| port.parse().unwrap_or(3306))
+        .unwrap_or(3306);
+    let db_name = env::var("MYSQL_DATABASE").unwrap_or("f1db".into());
+    let mut conn = mysql::Conn::new(
+        mysql::OptsBuilder::new()
+            .ip_or_hostname("localhost".into())
+            .tcp_port(port)
+            .user(Some(user))
+            .pass(Some(password))
+            .db_name(Some(db_name)),
+    )?;
 
     let race_id = *conn
         .query_map(
