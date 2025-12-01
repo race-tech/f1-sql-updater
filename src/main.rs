@@ -49,9 +49,9 @@ fn main() -> anyhow::Result<()> {
     lap_times(race_id, &base_path, &mut tx)?;
     pit_stops(race_id, &base_path, &mut tx)?;
     qualifying_results(race_id, &base_path, &mut tx)?;
-    driver_results(race_id, &base_path, &mut tx)?;
-    driver_championship(race_id, &base_path, &mut tx)?;
-    constructor_championship(race_id, &base_path, &mut tx)?;
+    results(race_id, &base_path, &mut tx)?;
+    driver_standings(race_id, &base_path, &mut tx)?;
+    constructor_standings(race_id, &base_path, &mut tx)?;
 
     if !is_sprint {
         constructor_results(race_id, &mut tx)?;
@@ -205,12 +205,8 @@ fn qualifying_results(
     Ok(())
 }
 
-fn driver_results(
-    race_id: i32,
-    base_path: &std::path::Path,
-    tx: &mut Transaction,
-) -> anyhow::Result<()> {
-    let file = base_path.join("race_results.csv");
+fn results(race_id: i32, base_path: &std::path::Path, tx: &mut Transaction) -> anyhow::Result<()> {
+    let file = base_path.join("results.csv");
     let mut rdr = csv::Reader::from_path(file)?;
 
     for r in rdr.deserialize::<models::RaceResult>() {
@@ -291,7 +287,7 @@ fn constructor_results(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()>
     Ok(())
 }
 
-fn driver_championship(
+fn driver_standings(
     race_id: i32,
     base_path: &std::path::Path,
     tx: &mut Transaction,
@@ -330,7 +326,7 @@ fn driver_championship(
     Ok(())
 }
 
-fn constructor_championship(
+fn constructor_standings(
     race_id: i32,
     base_path: &std::path::Path,
     tx: &mut Transaction,
