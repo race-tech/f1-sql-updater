@@ -15,6 +15,8 @@ fn main() -> anyhow::Result<()> {
     SimpleLogger::new().init()?;
 
     log::info!("starting with args: {:?}", env::args());
+    let base_path = env::var("F1_SQL_UPDATER_CSV_FOLDER").unwrap_or("csv".into());
+    let base_path = std::path::Path::new(&base_path);
     let round = env::args().nth(1).unwrap().parse::<u16>()?;
     let is_sprint = env::args().nth(2).unwrap().parse::<bool>()?;
     let year = chrono::Utc::now().year();
@@ -32,12 +34,12 @@ fn main() -> anyhow::Result<()> {
 
     let mut tx = conn.start_transaction(mysql::TxOpts::default())?;
 
-    lap_times(race_id, &mut tx)?;
-    pit_stops(race_id, &mut tx)?;
-    qualifying_results(race_id, &mut tx)?;
-    driver_results(race_id, &mut tx)?;
-    driver_championship(race_id, &mut tx)?;
-    constructor_championship(race_id, &mut tx)?;
+    lap_times(race_id, &base_path, &mut tx)?;
+    pit_stops(race_id, &base_path, &mut tx)?;
+    qualifying_results(race_id, &base_path, &mut tx)?;
+    driver_results(race_id, &base_path, &mut tx)?;
+    driver_championship(race_id, &base_path, &mut tx)?;
+    constructor_championship(race_id, &base_path, &mut tx)?;
 
     if !is_sprint {
         constructor_results(race_id, &mut tx)?;
@@ -53,8 +55,12 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn lap_times(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()> {
-    let file = "/etc/csv/lap_times.csv";
+fn lap_times(
+    race_id: i32,
+    base_path: &std::path::Path,
+    tx: &mut Transaction,
+) -> anyhow::Result<()> {
+    let file = base_path.join("lap_times.csv");
     let mut rdr = csv::Reader::from_path(file)?;
 
     for r in rdr.deserialize::<models::LapTime>() {
@@ -95,8 +101,12 @@ fn lap_times(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn pit_stops(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()> {
-    let file = "/etc/csv/pit_stops.csv";
+fn pit_stops(
+    race_id: i32,
+    base_path: &std::path::Path,
+    tx: &mut Transaction,
+) -> anyhow::Result<()> {
+    let file = base_path.join("pit_stops.csv");
     let mut rdr = csv::Reader::from_path(file)?;
 
     for r in rdr.deserialize::<models::PitStop>() {
@@ -138,8 +148,12 @@ fn pit_stops(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn qualifying_results(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()> {
-    let file = "/etc/csv/qualifying.csv";
+fn qualifying_results(
+    race_id: i32,
+    base_path: &std::path::Path,
+    tx: &mut Transaction,
+) -> anyhow::Result<()> {
+    let file = base_path.join("qualifying.csv");
     let mut rdr = csv::Reader::from_path(file)?;
 
     for r in rdr.deserialize::<models::Qualifying>() {
@@ -179,8 +193,12 @@ fn qualifying_results(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()> 
     Ok(())
 }
 
-fn driver_results(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()> {
-    let file = "/etc/csv/race_results.csv";
+fn driver_results(
+    race_id: i32,
+    base_path: &std::path::Path,
+    tx: &mut Transaction,
+) -> anyhow::Result<()> {
+    let file = base_path.join("race_results.csv");
     let mut rdr = csv::Reader::from_path(file)?;
 
     for r in rdr.deserialize::<models::RaceResult>() {
@@ -261,8 +279,12 @@ fn constructor_results(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()>
     Ok(())
 }
 
-fn driver_championship(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()> {
-    let file = "/etc/csv/driver_standings.csv";
+fn driver_championship(
+    race_id: i32,
+    base_path: &std::path::Path,
+    tx: &mut Transaction,
+) -> anyhow::Result<()> {
+    let file = base_path.join("driver_standings.csv");
     let mut rdr = csv::Reader::from_path(file)?;
 
     for r in rdr.deserialize::<models::DriverStanding>() {
@@ -296,8 +318,12 @@ fn driver_championship(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()>
     Ok(())
 }
 
-fn constructor_championship(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()> {
-    let file = "/etc/csv/constructor_standings.csv";
+fn constructor_championship(
+    race_id: i32,
+    base_path: &std::path::Path,
+    tx: &mut Transaction,
+) -> anyhow::Result<()> {
+    let file = base_path.join("constructor_standings.csv");
     let mut rdr = csv::Reader::from_path(file)?;
 
     for r in rdr.deserialize::<models::ConstructorStanding>() {
