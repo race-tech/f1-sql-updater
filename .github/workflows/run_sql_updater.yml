@@ -27,7 +27,7 @@ on:
         description: The F1 DB version to base the update on.
     outputs:
       artifact-id:
-        value: ${{ jobs.run-updater.steps.upload-artifacts.outputs.artifact-id }}
+        value: ${{ jobs.run-updater.outputs.artifact-id }}
         description: The artifact id of the sql dump generated.
       run-id:
         value: ${{ github.run_id }}
@@ -38,15 +38,18 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
-      MYSQL_PASSWORD: password
+      MYSQL_PWD: password
       MYSQL_DATABASE: f1db
+
+    outputs:
+      artifact-id: ${{ steps.upload-artifacts.outputs.artifact-id }}
 
     services:
       database:
         image: ghcr.io/race-tech/f1-db:${{ inputs.f1-db-version }}
         env:
           MYSQL_DATABASE: ${{ env.MYSQL_DATABASE }}
-          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_PWD }}
         ports:
           - 13306:3306
         options: --health-cmd="mysqladmin ping -u root" --health-interval=10s --health-timeout=5s --health-retries=3
