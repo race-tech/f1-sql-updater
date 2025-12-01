@@ -20,11 +20,20 @@ on:
         type: number
         required: true
         description: The run id of the workflow used to upload csv artifacts.
+      repository:
+        required: true
+        type: string
+        description: The repository from where we'll pull the csv files.
       f1-db-version:
         type: string
         required: false
         default: latest
         description: The F1 DB version to base the update on.
+    secrets:
+      access-token:
+        type: string
+        required: true
+        description: The access token to retrieve artifacts from the repository.
     outputs:
       artifact-id:
         value: ${{ jobs.run-updater.outputs.artifact-id }}
@@ -77,8 +86,8 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           artifact-ids: ${{ inputs.artifact-id }}
-          repository: race-tech/f1-data-downloader
-          github-token: ${{ secrets.GH_TOKEN }}
+          repository: ${{ inputs.repository }}
+          github-token: ${{ secrets.access-token }}
           run-id: ${{ inputs.run-id }}
           path: f1-sql-updater/csv
 
