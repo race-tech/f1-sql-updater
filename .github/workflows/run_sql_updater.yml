@@ -31,7 +31,6 @@ on:
         description: The F1 DB version to base the update on.
     secrets:
       access-token:
-        type: string
         required: true
         description: The access token to retrieve artifacts from the repository.
     outputs:
