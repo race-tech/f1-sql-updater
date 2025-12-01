@@ -26,7 +26,7 @@ fn main() -> anyhow::Result<()> {
     let port = env::var("MYSQL_TCP_PORT")
         .map(|port| port.parse().unwrap_or(3306))
         .unwrap_or(3306);
-    let db_name = env::var("MYSQL_DB_NAME").unwrap_or("f1db".into());
+    let db_name = env::var("MYSQL_DATABASE").unwrap_or("f1db".into());
     let mut conn = mysql::Conn::new(
         mysql::OptsBuilder::new()
             .ip_or_hostname("localhost".into())
