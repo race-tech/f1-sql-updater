@@ -37,7 +37,7 @@ jobs:
   run-updater:
     defaults:
       run:
-        working-directory: ./f1-sql-updater
+        working-directory: f1-sql-updater
     
     runs-on: ubuntu-latest
     env:
@@ -59,6 +59,12 @@ jobs:
         options: --health-cmd="mysqladmin ping -u root" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
+      - name: Setup working dir
+        working-directory: ${{ github.workspace }}
+        run: |
+          rm -rf f1-sql-updater
+          mkdir f1-sql-updater
+          
       - name: Verify f1db exists
         run: mysql --host 127.0.0.1 --port 13306 -uroot -e "SHOW DATABASES LIKE '${{ env.MYSQL_DATABASE }}'"
      
