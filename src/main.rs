@@ -52,13 +52,12 @@ fn main() -> anyhow::Result<()> {
     results(race_id, &base_path, &mut tx)?;
     driver_standings(race_id, &base_path, &mut tx)?;
     constructor_standings(race_id, &base_path, &mut tx)?;
+    constructor_results(race_id, base_path, &mut tx)?;
 
-    if !is_sprint {
-        constructor_results(race_id, &mut tx)?;
-    } else {
-        constructor_sprint_results(race_id, &mut tx)?;
+    if is_sprint {
+        // constructor_sprint_results(race_id, &mut tx)?;
         // sprint_lap_times(race_id, &mut tx)?;
-        driver_sprint_results(race_id, &mut tx)?;
+        // driver_sprint_results(race_id, &mut tx)?;
     }
 
     tx.commit()?;
@@ -262,8 +261,12 @@ fn results(race_id: i32, base_path: &std::path::Path, tx: &mut Transaction) -> a
     Ok(())
 }
 
-fn constructor_results(race_id: i32, tx: &mut Transaction) -> anyhow::Result<()> {
-    let file = "/etc/csv/constructor_results.csv";
+fn constructor_results(
+    race_id: i32,
+    base_path: &std::path::Path,
+    tx: &mut Transaction,
+) -> anyhow::Result<()> {
+    let file = base_path.join("constructor_results.csv");
     let mut rdr = csv::Reader::from_path(file)?;
 
     for r in rdr.deserialize::<models::ConstructorResult>() {
