@@ -45,15 +45,15 @@ jobs:
       database:
         image: ghcr.io/race-tech/f1-db:${{ inputs.f1-db-version }}
         env:
-          MYSQL_DATABASE: $MYSQL_DATABASE
-          MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD
+          MYSQL_DATABASE: ${{ env.MYSQL_DATABASE }}
+          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_PASSWORD }}
         ports:
           - 13306:3306
         options: --health-cmd="mysqladmin ping -u root" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Verify f1db exists
-        run: mysql --host 127.0.0.1 --port 13306 -uroot -e "SHOW DATABASES LIKE 'f1db'"
+        run: mysql --host 127.0.0.1 --port 13306 -uroot -e "SHOW DATABASES LIKE '${{ env.MYSQL_DATABASE }}'"
      
       - name: Retrieve latest binary
         run: gh release download --pattern 'f1-sql-updater'
@@ -74,7 +74,7 @@ jobs:
 
       - name: Create sql dump
         run: |
-          mysqldump --host 127.0.0.1 --port 13306 -uroot f1db > f1db.sql
+          mysqldump --host 127.0.0.1 --port 13306 -uroot ${{ env.MYSQL_DATABASE }}> f1db.sql
           gzip f1db.sql
 
       - name: Upload sql dump
