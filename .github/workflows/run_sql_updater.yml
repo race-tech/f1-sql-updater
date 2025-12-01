@@ -42,7 +42,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
+      MYSQL_USER: root
       MYSQL_PWD: password
+      MYSQL_TCP_PORT: 13306
       MYSQL_DATABASE: f1db
 
     outputs:
@@ -55,7 +57,7 @@ jobs:
           MYSQL_DATABASE: ${{ env.MYSQL_DATABASE }}
           MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_PWD }}
         ports:
-          - 13306:3306
+          - ${{ env.MYSQL_TCP_PORT }}:3306
         options: --health-cmd="mysqladmin ping -u root" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
@@ -66,7 +68,7 @@ jobs:
           mkdir f1-sql-updater
           
       - name: Verify f1db exists
-        run: mysql --host 127.0.0.1 --port 13306 -uroot -e "SHOW DATABASES LIKE '${{ env.MYSQL_DATABASE }}'"
+        run: mysql --host 127.0.0.1 -uroot -e "SHOW DATABASES LIKE '${{ env.MYSQL_DATABASE }}'"
      
       - name: Retrieve latest binary
         run: gh release download -R race-tech/f1-sql-updater --pattern 'f1-sql-updater'
@@ -87,7 +89,7 @@ jobs:
 
       - name: Create sql dump
         run: |
-          mysqldump --host 127.0.0.1 --port 13306 -uroot ${{ env.MYSQL_DATABASE }}> f1db.sql
+          mysqldump --host 127.0.0.1 -uroot ${{ env.MYSQL_DATABASE }}> f1db.sql
           gzip f1db.sql
 
       - name: Upload sql dump
